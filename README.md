@@ -1,4 +1,4 @@
-# juralen-vue-client2
+# juralen-vue-client
 
 ## Project setup
 ```

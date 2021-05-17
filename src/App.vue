@@ -1,30 +1,52 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view/>
+  <ul v-if="!loading">
+    {{
+      data
+    }}
+    <li v-for="user in data.allUsers" :key="user.id">
+      ({{ user.id }}) {{ user.name }} | {{ user.email }}
+    </li>
+  </ul>
+  <div>{{ sub }}</div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import { defineComponent } from "vue";
+import { useQuery, useSubscription } from "@/graphql";
+import gql from "graphql-tag";
 
-#nav {
-  padding: 30px;
-}
+export default defineComponent({
+  name: "App",
+  setup() {
+    const { data: sub } = useSubscription(gql`
+      subscription NewGameCreated {
+        newGameCreated(uuid: "1b76f699-3716-4f93-b897-e3b336fdeee8") {
+          uuid
+          grid {
+            x
+            y
+            cellType
+            structure
+            defBonus
+          }
+        }
+      }
+    `);
+    const { loading, data } = useQuery(gql`
+      query AllUsers {
+        allUsers {
+          name
+          id
+          email
+        }
+      }
+    `);
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+    return {
+      loading,
+      data,
+      sub,
+    };
+  }
+});
+</script>
