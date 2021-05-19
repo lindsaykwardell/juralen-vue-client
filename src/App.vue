@@ -11,23 +11,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { useQuery, useSubscription } from "@/graphql";
+import { defineComponent, onMounted } from "vue";
+import { useQuery, useSubscription, useMutation } from "@/graphql";
 import gql from "graphql-tag";
 
 export default defineComponent({
   name: "App",
   setup() {
     const { data: sub } = useSubscription(gql`
-      subscription NewGameCreated {
-        newGameCreated(uuid: "1b76f699-3716-4f93-b897-e3b336fdeee8") {
+      subscription GameQueue {
+        gameQueue {
           uuid
-          grid {
-            x
-            y
-            cellType
-            structure
-            defBonus
+          # grid {
+          #   x
+          #   y
+          #   cellType
+          #   structure
+          #   defBonus
+          # }
+          players {
+            name
+            id
           }
         }
       }
@@ -42,11 +46,21 @@ export default defineComponent({
       }
     `);
 
+    onMounted(() =>
+      setTimeout(() => {
+        useMutation(gql`
+          mutation JoinLobby {
+            joinLobby
+          }
+        `);
+      }, 2000)
+    );
+
     return {
       loading,
       data,
       sub,
     };
-  }
+  },
 });
 </script>
